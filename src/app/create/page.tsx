@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
@@ -15,10 +15,16 @@ const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"];
 const DURATIONS = ["1 Hour", "3 Hours", "1 Day", "1 Week", "1 Month"];
 
 export default function CreateCoursePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login?redirect=/create");
+    }
+  }, [user, authLoading, router]);
 
   // Form State
   const [category, setCategory] = useState("");
@@ -29,10 +35,7 @@ export default function CreateCoursePage() {
   const [visibility, setVisibility] = useState("public");
 
   const handleGenerate = async () => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+    if (!user) return;
     
     setIsGenerating(true);
 

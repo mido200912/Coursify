@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { Mail, Lock, LogIn, AlertCircle, Hand } from "lucide-react";
 
-export default function LoginPage() {
+function LoginContent() {
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +30,7 @@ export default function LoginPage() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      router.push(redirectPath);
     } catch (err: any) {
       console.error("Login Error:", err);
       const errorCode = err.code;
@@ -45,7 +55,7 @@ export default function LoginPage() {
     setError("");
     try {
       await signInWithPopup(auth, googleProvider);
-      router.push("/dashboard");
+      router.push(redirectPath);
     } catch (err: any) {
       console.error("Google Auth Error:", err);
       if (err.code === "auth/unauthorized-domain") {
@@ -149,5 +159,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+      <LoginContent />
+    </Suspense>
   );
 }
