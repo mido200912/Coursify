@@ -311,6 +311,38 @@ export default function LandingPage() {
             </Link>
           </div>
         </section>
+        {/* Team Section */}
+        <section className="py-24 px-6 relative overflow-hidden bg-zinc-50 dark:bg-white/[0.02]">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 mb-6">
+                  <Star size={14} className="text-blue-500 fill-blue-500" />
+                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Meet the Creators</span>
+                </div>
+                <h2 className="text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+                  Crafted by passionate developers.
+                </h2>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { name: "Mohamed Elsayed", role: "Fullstack Developer", initial: "M", color: "from-blue-500 to-cyan-500" },
+                { name: "Asmaa Mostafa", role: "App Developer", initial: "A", color: "from-purple-500 to-pink-500" },
+                { name: "Bishoy Osama", role: "Frontend Developer", initial: "B", color: "from-indigo-500 to-blue-500" }
+              ].map((member, i) => (
+                <div key={i} className="group bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 p-8 rounded-[2rem] hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${member.color} flex items-center justify-center text-white text-2xl font-black mb-6 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform`}>
+                    {member.initial}
+                  </div>
+                  <h3 className="text-xl font-black text-zinc-900 dark:text-white mb-2">{member.name}</h3>
+                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">{member.role}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-zinc-200/50 dark:border-white/5 py-10 px-6">
