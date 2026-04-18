@@ -22,7 +22,19 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to log in.");
+      console.error("Login Error:", err);
+      const errorCode = err.code;
+      let friendlyMessage = "An error occurred during sign in. Please try again.";
+
+      if (errorCode === "auth/invalid-credential" || errorCode === "auth/wrong-password" || errorCode === "auth/user-not-found") {
+        friendlyMessage = "Invalid email or password. Please double-check your credentials.";
+      } else if (errorCode === "auth/unauthorized-domain") {
+        friendlyMessage = "This domain is not authorized for sign in. Please contact support.";
+      } else if (errorCode === "auth/network-request-failed") {
+        friendlyMessage = "Network error. Please check your internet connection.";
+      }
+      
+      setError(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -35,7 +47,12 @@ export default function LoginPage() {
       await signInWithPopup(auth, googleProvider);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to authenticate with Google.");
+      console.error("Google Auth Error:", err);
+      if (err.code === "auth/unauthorized-domain") {
+        setError("This domain is not authorized for Google Sign In.");
+      } else {
+        setError("Failed to sign in with Google. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

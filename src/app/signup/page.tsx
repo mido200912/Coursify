@@ -22,7 +22,21 @@ export default function SignupPage() {
       await createUserWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to create account.");
+      console.error("Signup Error:", err);
+      const errorCode = err.code;
+      let friendlyMessage = "Failed to create account. Please try again.";
+
+      if (errorCode === "auth/email-already-in-use") {
+        friendlyMessage = "This email is already registered. Try signing in instead.";
+      } else if (errorCode === "auth/weak-password") {
+        friendlyMessage = "Password is too weak. Please use at least 6 characters.";
+      } else if (errorCode === "auth/invalid-email") {
+        friendlyMessage = "The email format is invalid.";
+      } else if (errorCode === "auth/network-request-failed") {
+        friendlyMessage = "Network error. Please check your internet connection.";
+      }
+      
+      setError(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -35,7 +49,12 @@ export default function SignupPage() {
       await signInWithPopup(auth, googleProvider);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to authenticate with Google.");
+      console.error("Google Signup Error:", err);
+      if (err.code === "auth/unauthorized-domain") {
+        setError("This domain is not authorized for Google authentication.");
+      } else {
+        setError("Failed to sign up with Google. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
