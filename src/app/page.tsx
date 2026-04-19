@@ -382,15 +382,21 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-zinc-200/50 dark:border-white/5 py-10 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 opacity-50 grayscale">
+      <footer className="border-t border-zinc-200/50 dark:border-white/5 py-12 px-6 bg-white dark:bg-[#09090b]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col items-center md:items-start gap-4">
             <BrandLogo />
+            <p className="text-sm text-zinc-500 max-w-xs text-center md:text-left">
+              Empowering the world to learn anything through AI-driven personalized education.
+            </p>
           </div>
-          <p className="text-sm text-zinc-500">© {new Date().getFullYear()} Coursify. Built for modern learners.</p>
-          <div className="flex gap-6 text-sm font-medium text-zinc-500">
-            <Link href="/privacy" className="hover:text-zinc-900 dark:hover:text-white">Privacy</Link>
-            <Link href="/terms" className="hover:text-zinc-900 dark:hover:text-white">Terms</Link>
+          <div className="flex flex-col items-center md:items-end gap-4">
+            <div className="flex gap-8 text-sm font-bold text-zinc-400 uppercase tracking-widest">
+              <Link href="/explore" className="hover:text-blue-500 transition-colors">Explore</Link>
+              <Link href="/dashboard" className="hover:text-blue-500 transition-colors">Dashboard</Link>
+              <Link href="/create" className="hover:text-blue-500 transition-colors">Create</Link>
+            </div>
+            <p className="text-xs text-zinc-500 font-medium">© {new Date().getFullYear()} Coursify. Crafted with Love.</p>
           </div>
         </div>
       </footer>
