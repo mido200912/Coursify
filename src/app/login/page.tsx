@@ -15,8 +15,6 @@ function LoginContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -30,7 +28,7 @@ function LoginContent() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push(redirectPath);
+      router.push("/dashboard");
     } catch (err: any) {
       console.error("Login Error:", err);
       const errorCode = err.code;
@@ -55,7 +53,7 @@ function LoginContent() {
     setError("");
     try {
       await signInWithPopup(auth, googleProvider);
-      router.push(redirectPath);
+      router.push("/dashboard");
     } catch (err: any) {
       console.error("Google Auth Error:", err);
       if (err.code === "auth/unauthorized-domain") {

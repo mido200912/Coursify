@@ -22,7 +22,7 @@ export default function CreateCoursePage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/login?redirect=/create");
+      router.push("/login");
     }
   }, [user, authLoading, router]);
 
