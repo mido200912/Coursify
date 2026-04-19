@@ -59,19 +59,34 @@ CRITICAL: The "about" section for EACH chapter must be extremely detailed and lo
     });
 
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error("OpenRouter Error Body:", errorBody);
       throw new Error(`Failed to fetch from OpenRouter: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log("Raw OpenRouter Data:", JSON.stringify(data, null, 2));
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response structure from OpenRouter");
+    }
+
     let resultText = data.choices[0].message.content;
+    console.log("AI Content:", resultText);
 
     resultText = resultText.replace(/```json\n?|```/gi, "").trim();
     
-    return NextResponse.json(JSON.parse(resultText), { status: 200 });
+    try {
+      const parsedData = JSON.parse(resultText);
+      return NextResponse.json(parsedData, { status: 200 });
+    } catch (parseError) {
+      console.error("JSON Parse Error. Raw text:", resultText);
+      throw new Error("Failed to parse AI response as JSON");
+    }
   } catch (error: any) {
-    console.error("Course Generation Error:", error);
+    console.error("Course Generation Error Details:", error);
     return NextResponse.json(
-      { error: "Failed to generate course" },
+      { error: error.message || "Failed to generate course" },
       { status: 500 }
     );
   }
