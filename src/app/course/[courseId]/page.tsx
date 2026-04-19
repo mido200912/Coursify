@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { BookOpen, PlayCircle, Clock, ChevronLeft, Bot, Send, X, CheckCircle2, ChevronRight, Check, Download, MessageSquare, LogOut } from "lucide-react";
+import { BookOpen, PlayCircle, Clock, ChevronLeft, Bot, Send, X, CheckCircle2, ChevronRight, Check, Download, MessageSquare, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ThemeToggle } from "@/components/layout/ThemeToggle"; 
@@ -62,6 +62,8 @@ export default function CourseViewer() {
 
   // Progress State
   const [completedChapters, setCompletedChapters] = useState<number[]>([]);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchNotes = async () => {
     if (!courseId) return;
@@ -135,8 +137,6 @@ export default function CourseViewer() {
   const progressPercentage = Math.round((completedChapters.length / (course?.chapters?.length || 1)) * 100);
 
   const handleDownloadPDF = async () => {
-    // Rely on native print dialog configured for print CSS
-    // Extremely robust for Tailwind modern colors (lab/oklch)
     window.print();
   };
 
@@ -204,7 +204,6 @@ export default function CourseViewer() {
       const chapter = course.chapters[activeChapterIndex];
       if (!chapter) return;
       
-      // If we already fetched or are currently fetching this chapter's video, skip
       if (chapterVideos[activeChapterIndex]) return;
 
       setChapterVideos(prev => ({ ...prev, [activeChapterIndex]: { videoId: null, fetching: true } }));
@@ -218,7 +217,6 @@ export default function CourseViewer() {
           const videos: {videoId: string, duration: string}[] = data.videos || [];
           
           let chosenVideo = videos[0] || null;
-          // Try to pick a video that hasn't been used yet to prevent repeating
           for (const vid of videos) {
             if (!usedVideosTracker.current.has(vid.videoId)) {
               chosenVideo = vid;
@@ -252,7 +250,7 @@ export default function CourseViewer() {
 
   if (!course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white font-sans">
         <div className="animate-pulse flex items-center gap-2">
           <BookOpen className="animate-bounce" /> Loading Masterclass...
         </div>
@@ -260,33 +258,45 @@ export default function CourseViewer() {
     );
   }
 
-  if (!course.chapters || !Array.isArray(course.chapters) || course.chapters.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white p-6">
-        <BookOpen className="mb-4 opacity-20" size={64} />
-        <h2 className="text-2xl font-bold mb-2">Structure Not Found</h2>
-        <p className="text-zinc-500 dark:text-zinc-400 text-center max-w-md">
-          The AI failed to generate chapters in the expected format. Please try generating the course again.
-        </p>
-        <Link href="/create" className="mt-6 bg-indigo-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-indigo-700 transition">
-          Create New Course
-        </Link>
-      </div>
-    );
-  }
-
   const activeChapter = course.chapters[activeChapterIndex] || course.chapters[0];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-zinc-50 dark:bg-zinc-950 font-sans print:bg-white print:text-black">
+    <div className="min-h-screen flex flex-col md:flex-row bg-zinc-50 dark:bg-zinc-950 font-sans print:bg-white print:text-black transition-colors">
+      
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-50 print:hidden">
+        <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition">
+           <ChevronLeft size={24} />
+        </Link>
+        <span className="font-black text-sm uppercase tracking-widest truncate max-w-[150px]">{course.courseName}</span>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 print:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-full md:w-80 border-r border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl h-auto md:h-screen sticky top-0 overflow-y-auto shrink-0 flex flex-col print:hidden">
+      <aside className={`
+        fixed inset-y-0 left-0 w-80 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 h-screen sticky top-0 overflow-y-auto shrink-0 flex flex-col z-50 transform transition-transform duration-300 ease-in-out print:hidden
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        md:relative md:translate-x-0 md:bg-white/80 md:dark:bg-zinc-900/80 md:backdrop-blur-xl
+      `}>
          <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
-            <Link href="/" className="mb-8 block">
+            <Link href="/" className="mb-8 hidden md:block">
                <img src="/images/logo/logo-light.png" className="h-12 w-auto block dark:hidden" alt="Coursify" />
                <img src="/images/logo/logo-dark.png" className="h-12 w-auto hidden dark:block" alt="Coursify" />
             </Link>
-            <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center gap-2 text-sm font-bold mb-6 transition">
+            <Link href="/dashboard" className="hidden md:flex text-zinc-500 hover:text-zinc-900 dark:hover:text-white items-center gap-2 text-sm font-bold mb-6 transition">
               <ChevronLeft size={16} /> Dashboard
             </Link>
            <h2 className="text-xl font-bold text-zinc-900 dark:text-white leading-tight mb-2">
@@ -316,7 +326,10 @@ export default function CourseViewer() {
             {course.chapters.map((chapter, idx) => (
               <button
                 key={idx}
-                onClick={() => setActiveChapterIndex(idx)}
+                onClick={() => {
+                  setActiveChapterIndex(idx);
+                  setIsSidebarOpen(false);
+                }}
                 className={`w-full text-left p-3 rounded-xl flex items-start gap-3 transition-all ${
                   activeChapterIndex === idx 
                     ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-500/20 shadow-sm" 
@@ -350,7 +363,10 @@ export default function CourseViewer() {
               <ThemeToggle />
            </div>
            <button
-             onClick={() => logout()}
+            onClick={() => {
+              logout();
+              setIsSidebarOpen(false);
+            }}
              className="flex w-full items-center gap-3 px-4 py-2 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all font-bold text-sm"
            >
              <LogOut size={18} /> Logout

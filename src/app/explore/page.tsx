@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { Globe, Users, BookOpen, Compass, Search, Sparkles, LogIn } from "lucide-react";
+import { Compass, BookOpen, Search, Sparkles, LogIn, Menu, X, ArrowRight, Globe, Users } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 
@@ -28,6 +28,7 @@ export default function ExplorePage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchPublicCourses = async () => {
@@ -56,7 +57,7 @@ export default function ExplorePage() {
       <nav className="bg-white/60 dark:bg-[#09090b]/60 backdrop-blur-xl sticky top-0 z-50 border-b border-zinc-200/50 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <BrandLogo />
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <ThemeToggle />
             {user ? (
                <Link href="/dashboard" className="text-sm font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-2 rounded-full hover:scale-105 transition-transform">
@@ -68,7 +69,37 @@ export default function ExplorePage() {
               </Link>
             )}
           </div>
+
+          <div className="flex md:hidden items-center gap-4">
+            <ThemeToggle />
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden fixed inset-0 top-16 bg-white dark:bg-[#09090b] z-40 p-6 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col gap-6">
+              {user ? (
+                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-indigo-600 dark:text-indigo-400 border-b border-zinc-100 dark:border-zinc-800 pb-4 flex justify-between items-center">
+                  My Dashboard <ArrowRight size={20} />
+                </Link>
+              ) : (
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4 flex justify-between items-center">
+                  Sign In <LogIn size={20} />
+                </Link>
+              )}
+              <Link href="/create" onClick={() => setIsMenuOpen(false)} className="bg-blue-600 text-white text-center py-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20">
+                Generate New Course
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-12">

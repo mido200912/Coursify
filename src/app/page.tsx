@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { 
   ArrowRight, Sparkles, PlayCircle, FileText, CheckCircle2, 
   MessageSquare, Compass, BrainCircuit, Zap, GraduationCap, 
-  Bot, Star, BookOpen, ArrowUpRight 
+  Bot, Star, BookOpen, ArrowUpRight, Menu, X 
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -16,12 +16,12 @@ const BrandLogo = () => (
   <Link href="/" className="flex items-center group cursor-pointer">
     <img 
       src="/images/logo/logo-light.png" 
-      className="h-20 md:h-32 w-auto block dark:hidden transition-all duration-300 group-hover:scale-105" 
+      className="h-16 md:h-24 w-auto block dark:hidden transition-all duration-300 group-hover:scale-105" 
       alt="Coursify Logo" 
     />
     <img 
       src="/images/logo/logo-dark.png" 
-      className="h-20 md:h-32 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105" 
+      className="h-16 md:h-24 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105" 
       alt="Coursify Logo" 
     />
   </Link>
@@ -79,6 +79,7 @@ const THEME_MAP: Record<string, string> = {
 
 export default function LandingPage() {
   const { user } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const featuresRef = useScrollReveal();
   const stepsRef = useScrollReveal();
   const chatRef = useScrollReveal();
@@ -89,24 +90,60 @@ export default function LandingPage() {
       <nav className="bg-white/60 dark:bg-[#09090b]/60 backdrop-blur-xl sticky top-0 z-50 border-b border-zinc-200/50 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <BrandLogo />
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/explore" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">Directory</Link>
             <ThemeToggle />
             {user ? (
                <Link href="/dashboard" className="text-sm font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-2 rounded-full hover:scale-105 transition-transform">
                  Go to Dashboard
                </Link>
             ) : (
-              <>
-                <Link href="/login" className="hidden md:block text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              <div className="flex items-center gap-4">
+                <Link href="/login" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                   Sign In
                 </Link>
-                <Link href="/signup" className="text-sm font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-2 rounded-full hover:scale-105 transition-transform">
+                <Link href="/signup" className="text-sm font-semibold bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/20">
                   Get Started
                 </Link>
-              </>
+              </div>
             )}
           </div>
+
+          <div className="flex md:hidden items-center gap-4">
+            <ThemeToggle />
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden fixed inset-0 top-16 bg-white dark:bg-[#09090b] z-40 p-6 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col gap-6">
+              <Link href="/explore" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4 flex justify-between items-center">
+                Explore Courses <Compass size={20} />
+              </Link>
+              {user ? (
+                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-indigo-600 dark:text-indigo-400 border-b border-zinc-100 dark:border-zinc-800 pb-4 flex justify-between items-center">
+                  My Dashboard <ArrowRight size={20} />
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4 flex justify-between items-center">
+                    Sign In <ArrowRight size={20} />
+                  </Link>
+                  <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="bg-indigo-600 text-white text-center py-4 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20">
+                    Get Started Free
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       <main>
